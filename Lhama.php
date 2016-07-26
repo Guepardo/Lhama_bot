@@ -1,8 +1,7 @@
 <?php 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/util/NamesFactory.php';
-
-date_default_timezone_set('BRT');
+date_default_timezone_set('America/Sao_Paulo');
 
 use Telegram\Bot\Api;
 
@@ -18,7 +17,10 @@ class Lhama{
 	}
 
 	private function sendMessage($message = 'nothing, bip bip'){
-		$toSend = ['chat_id' => $this->chat_id, 'text' => $message ]; 
+		$toSend = ['chat_id' => $this->chat_id,
+				   'text'    => $message, 
+				   'parse_mode' => 'HTML' ]; 
+
 		$this->telegram->sendMessage($toSend); 
 	}
 
@@ -56,20 +58,23 @@ class Lhama{
 
 		if($_SESSION['count'] == 0){
 			$toSend = "Humn, parece que alguém acabou de interagir com site e eu não o vi nas últimas 24 horas."; 
-			$toSend .= "Vou chama-lo(a) de ". $_SESSION['name']; 
+			$toSend .= "Vou chama-lo(a) de <b>". $_SESSION['name'].'</b>'; 
 		}else{
-			$toSend = "Já o/a ". $_SESSION['name'].' aqui antes.';
-			$toSend .= "Ele/Ela já interagiu ". $_SESSION['count']. " vezes com o site.";
+			$toSend = "Já o/a vi <b>". $_SESSION['name'].'</b> aqui antes.';
+			$toSend .= "Ele/Ela já interagiu <b>". $_SESSION['count']. "</b> vezes com o site.";
 		}
 
-		$brower = $_SERVER['HTTP_USER_AGENT']; 
+		$browser = $_SERVER['HTTP_USER_AGENT']; 
 
-		$toSend .='\n Outra tipos de informações: \n'; 
-		$toSend .= 'Navegador : '. $brower. '\n'; 
-		$toSend .= 'Ação executada no site '. $whatAction. '\n'; 
-		$toSend .= 'Última vez visto às '. $_SESSION['last_request']; 
+		$toSend .= PHP_EOL;
+		$toSend .='<code>'.PHP_EOL.'Outras informações:'.PHP_EOL.'</code>'; 
+		$toSend .= PHP_EOL;
+		$toSend .= '<b>Navegador: </b>'. $browser.PHP_EOL; 
+		$toSend .= '<b>Ação executada no site: </b> '. $whatAction. PHP_EOL; 
+		$toSend .= '<b>Última vez visto às: </b>'. $_SESSION['last_request']; 
 
 		$_SESSION['last_request'] = date('H:m:s'); 
+
 		return $toSend; 
 	}
 
@@ -82,6 +87,7 @@ class Lhama{
 			$_SESSION['count'] = 0; 
 		else
 			$_SESSION['count'] += 1; 
+
 	
 		$_SESSION['last_request'] = date('Y-m-d H:i:s'); 
 	}
@@ -112,3 +118,4 @@ class Lhama{
 		die(self::buildResponse());
 	}
 }
+
