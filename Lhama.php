@@ -2,6 +2,7 @@
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/util/NamesFactory.php';
 date_default_timezone_set('America/Sao_Paulo');
+session_start();
 
 use Telegram\Bot\Api;
 
@@ -10,13 +11,13 @@ class Lhama{
 	private $telegram   = null; 
 	private $chat_id    = ''; 
 	private $api_key    = ''; 
-	private $lhama_key  = 'nadas'; 
+	private $lhama_key  = '6687ed3ce38df48acfc1b1a0efc900e8_exemple'; 
 
 	public function __construct(){
 		$this->telegram = new Api($this->api_key);
 	}
 
-	private function sendMessage($message = 'nothing, bip bip'){
+	public function sendMessage($message = 'nothing, bip bip'){
 		$toSend = ['chat_id' => $this->chat_id,
 				   'text'    => $message, 
 				   'parse_mode' => 'HTML' ]; 
@@ -36,19 +37,20 @@ class Lhama{
 
 	private function buildMessage($action){
 		//list of lhama actions: 
-		//click
-		//open_site 
+		//click 1 
+		//open_site 2
 
 		$whatAction = ''; 
 
 		switch($action){
-			case 'click': 
-				$whatAction = "Clicou no site"; 
+			case '1': 
+				$whatAction = "Clicks no site"; 
 			break; 
-
-			case 'open_site': 
+			case '2': 
 				$whatAction = "Abriu o site"; 
-
+			break; 
+			default:
+				die(self::buildResponse(false)); 
 		}
 
 		//Get some informations from session: 
@@ -60,36 +62,36 @@ class Lhama{
 			$toSend = "Humn, parece que alguém acabou de interagir com site e eu não o vi nas últimas 24 horas."; 
 			$toSend .= "Vou chama-lo(a) de <b>". $_SESSION['name'].'</b>'; 
 		}else{
-			$toSend = "Já o/a vi <b>". $_SESSION['name'].'</b> aqui antes.';
+			$toSend = "Já vi o/a <b>". $_SESSION['name'].'</b> aqui antes.';
 			$toSend .= "Ele/Ela já interagiu <b>". $_SESSION['count']. "</b> vezes com o site.";
 		}
 
-		$browser = $_SERVER['HTTP_USER_AGENT']; 
+		if(!($_SESSION['count'] % 5 == 0) )
+			die;
+
+		$ip =  $_SERVER["REMOTE_ADDR"]; 
 
 		$toSend .= PHP_EOL;
 		$toSend .='<code>'.PHP_EOL.'Outras informações:'.PHP_EOL.'</code>'; 
 		$toSend .= PHP_EOL;
-		$toSend .= '<b>Navegador: </b>'. $browser.PHP_EOL; 
+		$toSend .= '<b>Ip: </b>'. $ip.PHP_EOL; 
 		$toSend .= '<b>Ação executada no site: </b> '. $whatAction. PHP_EOL; 
 		$toSend .= '<b>Última vez visto às: </b>'. $_SESSION['last_request']; 
 
-		$_SESSION['last_request'] = date('H:m:s'); 
+		$_SESSION['last_request'] = date('Y-m-d H:i:s'); 
 
 		return $toSend; 
 	}
 
 	private function checkSession(){
-		if( empty($_SESSION['name']))
+		if( !isset($_SESSION['name']))
 			$_SESSION['name'] = NamesFactory::getName();
 		
 
-		if( empty($_SESSION['count']))
+		if( !isset($_SESSION['count']))
 			$_SESSION['count'] = 0; 
 		else
 			$_SESSION['count'] += 1; 
-
-	
-		$_SESSION['last_request'] = date('Y-m-d H:i:s'); 
 	}
 
 	private function buildResponse($status = true){
