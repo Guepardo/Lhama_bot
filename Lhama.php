@@ -9,9 +9,9 @@ use Telegram\Bot\Api;
 class Lhama{
 
 	private $telegram   = null; 
-	private $chat_id    = ''; 
-	private $api_key    = ''; 
-	private $lhama_key  = '6687ed3ce38df48acfc1b1a0efc900e8_exemple'; 
+	private $chat_id    = '-1001067221009'; 
+	private $api_key    = '245703821:AAGLEbA7KcfUOioN6S2aaTtKQSsttpSJ35c'; 
+	private $lhama_key  = '6687ed3ce38df48acfc1b1a0efc900e8'; 
 
 	public function __construct(){
 		$this->telegram = new Api($this->api_key);
@@ -58,9 +58,19 @@ class Lhama{
 
 		$toSend = ''; 
 
+		$ip =  $_SERVER["REMOTE_ADDR"]; 
+		
+		$location = file_get_contents('http://freegeoip.net/json/'.$ip); 
+
+		$location = json_decode($location); 
+
 		if($_SESSION['count'] == 0){
 			$toSend = "Humn, parece que alguém acabou de interagir com site e eu não o vi nas últimas 24 horas."; 
 			$toSend .= "Vou chama-lo(a) de <b>". $_SESSION['name'].'</b>'; 
+			$toSend .= PHP_EOL;
+			$toSend .= '<b>País: </b>'.   $location->country_name .PHP_EOL; 
+			$toSend .= '<b>Estado: </b>'. $location->region_name .PHP_EOL; 
+			$toSend .= '<b>Cidade: </b>'. $location->city; 
 		}else{
 			$toSend = "Já vi o/a <b>". $_SESSION['name'].'</b> aqui antes.';
 			$toSend .= "Ele/Ela já interagiu <b>". $_SESSION['count']. "</b> vezes com o site.";
@@ -69,14 +79,15 @@ class Lhama{
 		if(!($_SESSION['count'] % 5 == 0) )
 			die;
 
-		$ip =  $_SERVER["REMOTE_ADDR"]; 
 
 		$toSend .= PHP_EOL;
 		$toSend .='<code>'.PHP_EOL.'Outras informações:'.PHP_EOL.'</code>'; 
 		$toSend .= PHP_EOL;
 		$toSend .= '<b>Ip: </b>'. $ip.PHP_EOL; 
 		$toSend .= '<b>Ação executada no site: </b> '. $whatAction. PHP_EOL; 
-		$toSend .= '<b>Última vez visto às: </b>'. $_SESSION['last_request']; 
+
+		if(!empty($_SESSION['last_request']))
+			$toSend .= '<b>Última vez visto às: </b>'. $_SESSION['last_request']; 
 
 		$_SESSION['last_request'] = date('Y-m-d H:i:s'); 
 
